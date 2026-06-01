@@ -33,3 +33,30 @@ pub fn main(init: std.process.Init) !void {
     try stdout.print("Character at index 28: {c}\n", .{base64._char_at(28)});
     try stdout.flush();
 }
+
+fn _calc_encode_length(input: []const u8) !usize {
+    if (input.len < 3) {
+        return 4;
+    }
+    const n_groups: usize = try std.math.divCeil(usize, input.len, 3);
+    return n_groups * 4;
+}
+
+fn _calc_decode_length(input: []const u8) !usize {
+    if (input.len < 4) {
+        return 3;
+    }
+
+    const n_groups: usize = try std.math.divFloor(usize, input.len, 4);
+    var multiple_groups: usize = n_groups * 3;
+    var i: usize = input.len - 1;
+    while (i > 0) : (i -= 1) {
+        if (input[i] == '=') {
+            multiple_groups -= 1;
+        } else {
+            break;
+        }
+    }
+
+    return multiple_groups;
+}
